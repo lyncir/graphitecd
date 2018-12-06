@@ -1,0 +1,2 @@
+psutil==5.4.8
+aiostatsd==1.0.0

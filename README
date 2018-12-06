@@ -2,14 +2,6 @@
 
 == Need
 
-* python2.7
-* daemon http://lyncir.com/blog/PEP3143/uploads/daemon.py
+* python3.5+
 * psutil
-* python-statsd
-* configobj
-
-
-== Other
-
-* node http://nodejs.org/dist/v0.10.26/node-v0.10.26.tar.gz
-* statsd https://github.com/etsy/statsd.git
+* aiostatsd

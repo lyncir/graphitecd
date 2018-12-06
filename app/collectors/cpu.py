@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 
+import socket
 import time
 import statsd
 import psutil
@@ -21,7 +22,7 @@ class Collector(object):
         """
         Collect cpu stats.
         """
-        cpu_time = psutil.cpu_times_percent(interval=1, percpu=False)
+        cpu_percents = psutil.cpu_percent(percpu=True)
 
         gauge = statsd.Gauge('.'.join([self.cfg['default']['hostname'], self.path]), self.conn)
         for c in cpu_time._fields:

@@ -1,37 +1,33 @@
 # -*- coding: utf8 -*-
-
+import socket
 import sys
 import time
-import traceback
-from daemon import Daemon
+import statsd
 
+import psutil
+
+from daemon import Daemon
 from app import settings
-from app import logger
 
 
 config = settings.get_config()
+hostname = socket.gethostname()
 
-
-def importName(modulename, name):
-    try:
-        module = __import__(modulename, globals(), locals(), [name])
-    except ImportError:
-        return None
-    return getattr(module, name)
+conn = statsd.Connection(config['statsd']['host'], config['statsd']['port'])
+gauge = statsd.Gauge('.'.join([hostname, 'cpu']), conn)
 
 
 class GraphitecdDaemon(Daemon):
     def run(self):
         while True:
-            try:
-                for extname in config['collectors']['enabled']:
-                    CollectorClass = importName("app.collectors." + extname, 'Collector')
-                    collector = CollectorClass()
-                    collector.collect()
-            except:
-                logger.error(traceback.format_exc())
-                sys.exit(2)
-            time.sleep(10)
+            cpu_percents = psutil.cpu_percent(percpu=True)
+            for i in range(len(cpu_percents)):
+                value = cpu_percents[i]
+                metric_path = 'cpu{}.percent'.format(i)
+                # print(time.time(), metric_path, value)
+                gauge.send(metric_path, value)
+
+            time.sleep(0.5)
 
 
 if __name__ == "__main__":
@@ -50,4 +46,3 @@ if __name__ == "__main__":
     else:
         print "usage: %s start|stop|restart" % sys.argv[0]
         sys.exit(2)
-
